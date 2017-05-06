@@ -68,6 +68,9 @@ def helpMessage():
 	print "   help   			- to list all the file in the client"
 
 
+#*************************************************************
+#Show ls command from the server side
+#***********************************************************
 def lsCommand():
 	#print "back from server"
 	result = listenForPort()
@@ -77,6 +80,11 @@ def lsCommand():
 	#	print test
 
 
+#*************************************************************
+#listen for the new port and retrive the data from the new
+#	port and send back only the data
+# @return - retrived data
+#***********************************************************
 def listenForPort():
 	newPort = readPacket(connSock, SIZE_HEAD)
 	#print newPort
@@ -86,7 +94,6 @@ def listenForPort():
 	data = ""
 	temp = ""
 	while True:
-
 		temp = readPacket(newSocket, SIZE_HEAD)
 
 		#break when donot have any message
@@ -178,23 +185,35 @@ def getOneItem(fileName):
 		fileObj.close()
 		print "Downloaded " + fileName
 
-
+# ******************************************************
+# listen for a new port number and send the file to the server
+# @param - sendData - data that need to be send to the server
+# @return - none
+# *******************************************************
 def listenForPortSend(sendData):
 	newPort = readPacket(connSock, SIZE_HEAD)
 	#print newPort
 	newSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	newSocket.connect((serverAddr, int(newPort)))
 
+	#this just need to run once because 
+	# sendOneItem is already looping
 	sendOneItem(newSocket,sendData ,SIZE_HEAD)
 
 	newSocket.close()
 
 
+#*********************************************************
+# read the file from local address and retrive all the fiel
+# @param - fileName - file to open
+# @return - none
+# ************************************************************
 def putOneItem(fileName):
 	if(os.path.isfile(fileName)):
 		fileObj = open(fileName, "r")
 		if(fileObj):
-			fileData = fileObj.read(100)
+			size = os.stat(fileName).st_size
+			fileData = fileObj.read(size)
 			listenForPortSend(fileData)
 			fileObj.close()
 			print "Uploaded " + fileName
